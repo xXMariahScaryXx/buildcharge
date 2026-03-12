@@ -97,6 +97,13 @@ expand_manifest_vars() {
   printf '%s' "$s"
 }
 
+strip_empty_cross_file() {
+  local s="$1"
+  s="$(echo "$s" | sed 's/ *--cross-file= *\\$//g')"
+  s="$(echo "$s" | sed 's/ *--cross-file= *//g')"
+  printf '%s' "$s"
+}
+
 main() {
   local output_entries=()
 
@@ -108,6 +115,9 @@ main() {
     expanded_build_cmd_json="$(
       jq -r 'if (.build_cmd | type) == "array" then .build_cmd[] else .build_cmd end' <<<"$entry" |
       while IFS= read -r line; do expand_manifest_vars "$line"; echo; done |
+      sed '/^ *--cross-file= *\\$/d' |
+      sed 's/ *--cross-file= *\\$/ \\/' |
+      sed 's/ *--cross-file=$//' |
       jq -R . | jq -s .
     )"
     expanded_entry="$(jq \

@@ -19,7 +19,8 @@ ifneq ($(TARGET),)
     ifneq ($(HOST_ARCH),x86_64)
       # Cross-compiling TO x86_64
       ifeq ($(BUILDENV),1)
-        CROSS_COMPILE := /opt/cross/x86_64-linux-musl/bin/x86_64-linux-musl-
+				TOOLCHAIN := x86_64-linux-musl
+        CROSS_COMPILE := /opt/cross/$(TOOLCHAIN)/bin/$(TOOLCHAIN)-
       else
         CROSS_COMPILE := x86_64-linux-gnu-
       endif
@@ -30,8 +31,9 @@ ifneq ($(TARGET),)
     ifneq ($(HOST_ARCH),aarch64)
       # Cross-compiling TO arm64
       ifeq ($(BUILDENV),1)
-        CROSS_COMPILE := /opt/cross/aarch64-linux-musl/bin/aarch64-linux-musl-
-      else
+				TOOLCHAIN := aarch64-linux-musl
+        CROSS_COMPILE := /opt/cross/$(TOOLCHAIN)/bin/$(TOOLCHAIN)-
+			else
         CROSS_COMPILE := aarch64-linux-gnu-
       endif
     endif

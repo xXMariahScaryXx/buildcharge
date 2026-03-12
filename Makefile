@@ -88,4 +88,5 @@ fullclean: cleanup-all
 # This target runs INSIDE the build-env chroot.
 # We have this at the bottom of the Makefile so we can easily jump down to it.
 internal_buildenv:
-	@echo "WIP"
+	$(Q)mkdir -p /packages
+	$(Q)bash $(PROJECT_DIR)/ramfs/scripts/parse-manifest.sh "$(PROJECT_DIR)/ramfs/manifest.json" "$(TOOLCHAIN)-" "$(ARCH)" /packages 

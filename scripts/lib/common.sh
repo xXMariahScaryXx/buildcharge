@@ -1,4 +1,5 @@
 project_name="buildcharge"
+env_command_file="/tmp/build_command"
 
 log(){
   section="$1"
@@ -76,7 +77,7 @@ unmount_build_env(){
 create_chroot_command(){
   local env_dir="$1"
   local command_content="$2"
-  local command_file="${env_dir}/tmp/build_command"
+  local command_file="${env_dir}/${env_command_file}"
 
   require_arg "$env_dir" "env_dir"
   require_arg "$command_content" "command_content"
@@ -140,7 +141,7 @@ run_in_build_env(){
   local command_file
   command_file=$(create_chroot_command "$env_dir" "$command_content")
 
-  exec_in_chroot "$env_dir" "$command_file"
+  exec_in_chroot "$env_dir" "$env_command_file"
 
   exit $?
 }

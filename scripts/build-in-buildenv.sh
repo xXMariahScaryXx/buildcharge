@@ -1,11 +1,13 @@
 #!/bin/bash
+VERBOSE="$4"
+[[ "$VERBOSE" == "1" ]] && set -x
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "${SCRIPT_DIR}"/lib/common.sh
 
 ENV_DIR="$1"
 PROJECT_DIR="$2"
 TARGET="$3"
-VERBOSE="$4"
 
 require_root
 require_arg "$ENV_DIR" "build-env dir"
