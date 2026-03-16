@@ -3,29 +3,29 @@ KCONFIG_FILE   := $(WORK_DIR)/Kconfig
 DOT_CONFIG     := $(PROJECT_DIR)/.config
 CONFIG_SH      := $(PROJECT_DIR)/scripts/lib/generated/config.sh
 
-.PHONY: menuconfig guiconfig gen-kconfig gen-config olddefconfig
+KCONFIG_FLAGS  := --kconfig $(KCONFIG_FILE) \
+                  --dot-config $(DOT_CONFIG) \
+                  --config-sh $(CONFIG_SH) \
+                  --manifest $(PROJECT_DIR)/ramfs/manifest.json
 
-menuconfig: gen-kconfig
-	@echo "  MENUCONFIG"
-	$(Q)$(KCONFIG_SCRIPT) menuconfig
+.PHONY: menuconfig guiconfig gen-kconfig gen-config olddefconfig config
 
-guiconfig: gen-kconfig
-	@echo "  GUICONFIG"
-	$(Q)$(KCONFIG_SCRIPT) guiconfig
+menuconfig:
+	$(Q)$(KCONFIG_SCRIPT) menuconfig $(KCONFIG_FLAGS)
 
-config: gen-kconfig
-	@echo "  CONFIG    .config"
-	$(Q)$(KCONFIG_SCRIPT) check
+guiconfig:
+	$(Q)$(KCONFIG_SCRIPT) guiconfig $(KCONFIG_FLAGS)
+
+config:
+	$(Q)$(KCONFIG_SCRIPT) check $(KCONFIG_FLAGS)
 
 gen-kconfig:
-	$(Q)bash scripts/kconfig/gen-kconfig.sh $(PROJECT_DIR)/ramfs/manifest.json
+	$(Q)$(KCONFIG_SCRIPT) gen-kconfig --manifest $(PROJECT_DIR)/ramfs/manifest.json --kconfig $(KCONFIG_FILE)
 
 gen-config:
-	@echo "  GEN-CONFIG"
-	$(Q)$(KCONFIG_SCRIPT) gen-config
+	$(Q)$(KCONFIG_SCRIPT) gen-config --dot-config $(DOT_CONFIG) --config-sh $(CONFIG_SH)
 
-olddefconfig: gen-kconfig
-	@echo "  OLDDEFCONFIG"
-	$(Q)$(KCONFIG_SCRIPT) olddefconfig
+olddefconfig:
+	$(Q)$(KCONFIG_SCRIPT) olddefconfig $(KCONFIG_FLAGS)
 
 -include $(CONFIG_SH)
