@@ -161,24 +161,6 @@
     ]
   },
   {
-    "name": "depthloader",
-    "package_name": "DEPTHLOADER",
-    "author": "kxtzownsu",
-    "description": "",
-    "dependencies": [],
-    "repo_url": "",
-    "repo_branch": "",
-    "directory": "depthloader",
-    "patch_directory": "",
-    "overlay_directory": "",
-    "build_cmd": [
-      "rustup target add ${MANIFEST_VAR_TARGET_ARCHITECTURE}-unknown-linux-musl",
-      "make all VERBOSE=1 ARCH=${MANIFEST_VAR_TARGET_ARCHITECTURE} BIN_STRIP=${MANIFEST_VAR_CROSS_COMPILATION_ABS_STRIP} BIN_OBJCOPY=${MANIFEST_VAR_CROSS_COMPILATION_ABS_OBJCOPY}",
-      "mkdir -p /initfs/bin",
-      "cp /packages/${MANIFEST_VAR_PACKAGE_DIRECTORY}/build/${MANIFEST_VAR_TARGET_ARCHITECTURE}/bin/depthloader /initfs/bin/depthloader"
-    ]
-  },
-  {
     "name": "busybox",
     "package_name": "BUSYBOX",
     "author": "busybox",
