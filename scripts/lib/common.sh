@@ -84,6 +84,7 @@ create_chroot_command(){
 
   cat <<EOF > "$command_file"
 #!/bin/bash
+source ~/.bashrc 2>/dev/null || true
 source /etc/profile 2>/dev/null || true
 source ~/.profile 2>/dev/null || true
 source /etc/bash/bashrc 2>/dev/null || true

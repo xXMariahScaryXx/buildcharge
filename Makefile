@@ -17,10 +17,18 @@ CMDLINE="$(project_name) console=tty0"
 EXEC := VERBOSE=$(VERBOSE) PROJECT_DIR=$(PROJECT_DIR) $(SHELL)
 include kconfig.mk
 
+INITFS_DIR := /initfs
+PACKAGE_DIR := /packages
+
+INITFS_CPIO := $(project_name).$(TARGET).cpio
+INITFS_CPIOZ := $(INITFS_CPIO).xz
+KPART := $(project_name).$(TARGET).kpart
+IMG := $(project_name).$(TARGET).bin
+BZIMAGE := $(project_name).$(TARGET).bzImage
+
 ifeq ($(VERBOSE),1)
 	CMDLINE="$(CMDLINE) loglevel=9 console=ttyS0,115200"
 endif
-
 
 .PHONY: usage arm64 x86_64 aarch64 config download-build-env build-inside-buildenv internal_buildenv cleanup-all cleanup-buildenv fullclean
 
@@ -54,7 +62,7 @@ else
 	@echo "  BUILDENV  (cached)"
 endif
 
-build-inside-buildenv: $(WORK_DIR) $(OUTDIR) download-build-env config
+build-inside-buildenv: $(WORK_DIR) $(OUTDIR) download-build-env config gen-kconfig gen-config
 	$(Q)$(SUDO) $(EXEC) scripts/build-in-buildenv.sh $(BUILDENV_DIR) $(PROJECT_DIR) $(TARGET)
 
 cleanup-buildenv:
@@ -68,21 +76,28 @@ cleanup-all:
 # fullclean is dangerous if stuff is mounted & could result
 # in a brick.
 fullclean: cleanup-all
-	@echo "  RM        $(BUILDENV_DIR)"
-	@rm -rf $(BUILDENV_DIR)
-	@echo "  RM        $(WORK_DIR)"
-	@rm -rf $(WORK_DIR)
-	@echo "  RM        $(OUTDIR)"
-	@rm -rf $(OUTDIR)
+	@echo "  SUDORM    $(BUILDENV_DIR)"
+	@sudo $(RM) -rf $(BUILDENV_DIR)
+	@echo "  SUDORM    $(WORK_DIR)"
+	@sudo $(RM) -rf $(WORK_DIR)
+	@echo "  SUDORM    $(OUTDIR)"
+	@sudo $(RM) -rf $(OUTDIR)
 	@echo "  RM        $(PROJECT_DIR)/scripts/lib/generated"
-	@rm -rf $(PROJECT_DIR)/scripts/lib/generated
+	@$(RM) -rf $(PROJECT_DIR)/scripts/lib/generated
 	@echo "  RM        .config"
-	@rm -rf $(PROJECT_DIR)/.config
-	@rm -rf $(PROJECT_DIR)/.config.old
+	@$(RM) -rf $(PROJECT_DIR)/.config
+	@$(RM) -rf $(PROJECT_DIR)/.config.old
 
 # This target runs INSIDE the build-env chroot.
 # We have this at the bottom of the Makefile so we can easily jump down to it.
+# P.S: we're running as root so we don't need $(SUDO)
 internal_buildenv:
-	$(Q)mkdir -p /packages
-	$(Q)$(EXEC) $(PROJECT_DIR)/ramfs/scripts/parse-manifest.sh "$(PROJECT_DIR)/ramfs/manifest.json" "$(TOOLCHAIN)-" "$(ARCH)" /packages
-	$(Q)$(EXEC) $(PROJECT_DIR)/ramfs/scripts/build-packages.sh "/tmp/manifest.json" "$(PROJECT_DIR)/.config" "/packages"
+	$(Q)$(MKDIR) -p "$(PACKAGE_DIR)"
+	$(Q)$(MKDIR) -p "$(PROJECT_DIR)/build/ramfs/" "$(PROJECT_DIR)/build/kernel/"
+	$(Q)$(EXEC) $(PROJECT_DIR)/ramfs/scripts/parse-manifest.sh "$(PROJECT_DIR)/ramfs/manifest.json" "$(TOOLCHAIN)-" "$(ARCH)" "$(PACKAGE_DIR)"
+	$(Q)$(EXEC) $(PROJECT_DIR)/ramfs/scripts/build-packages.sh "/tmp/manifest.json" "$(PACKAGE_DIR)"
+	$(Q)$(CHOWN) -R root:root $(INITFS_DIR)
+	$(Q)$(CHMOD) -R +x $(INITFS_DIR)/bin/
+	$(Q)$(CHMOD) -R +x $(INITFS_DIR)/sbin/
+	$(Q)cd $(INITFS_DIR) && find . -print | cpio -o -H newc -F $(INITFS_CPIO)
+	$(Q)$(MOVE) $(INITFS_DIR)/$(INITFS_CPIO) $(PROJECT_DIR)/build/ramfs/

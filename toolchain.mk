@@ -62,7 +62,10 @@ OBJCOPY := $(CROSS_COMPILE)objcopy
 STRIP := $(CROSS_COMPILE)strip
 
 ### Standard utilities ###
-CP ?= cp
+COPY ?= cp
+MOVE ?= mv
 RM ?= rm
 MKDIR ?= mkdir
 TOUCH ?= touch
+CHMOD ?= chmod
+CHOWN ?= chown

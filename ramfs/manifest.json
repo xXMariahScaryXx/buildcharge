@@ -104,7 +104,7 @@
     "repo_url": "https://gitlab.freedesktop.org/mesa/drm.git",
     "repo_branch": "libdrm-2.4.131",
     "directory": "libdrm",
-    "patch_directory": "${MANIFEST_VAR_MANIFEST_DIRECTORY}/patches/libdrm",
+    "patch_directory": "libdrm",
     "overlay_directory": "",
     "build_cmd": [
       "ln -s /usr/include/libdrm /usr/include/drm",
@@ -126,7 +126,7 @@
     "repo_url": "https://github.com/Aetf/libtsm.git",
     "repo_branch": "v4.1.0",
     "directory": "libtsm",
-    "patch_directory": "${MANIFEST_VAR_MANIFEST_DIRECTORY}/patches/libtsm",
+    "patch_directory": "libtsm",
     "overlay_directory": "",
     "build_cmd": [
       "cmake -B build -S . \\",
@@ -148,16 +148,16 @@
     "repo_url": "https://chromium.googlesource.com/chromiumos/platform/frecon.git",
     "repo_branch": "release-R123-15786.B",
     "directory": "frecon",
-    "patch_directory": "${MANIFEST_VAR_MANIFEST_DIRECTORY}/patches/frecon",
+    "patch_directory": "frecon",
     "overlay_directory": "",
     "build_cmd": [
       "make clean",
-      "ARCH=${MANIFEST_VAR_TARGET_ARCHITECTURE} make all FRECON_LITE=1 NOSTRIP=0 \\",
+      "make TARGET=frecon-lite ARCH=${MANIFEST_VAR_TARGET_ARCHITECTURE} OUT=build FRECON_LITE=1 NOSTRIP=0 all \\",
       "  CROSS_COMPILE=${MANIFEST_VAR_CROSS_COMPILATION_DASH} \\",
       "  CFLAGS=\"-fno-PIE -fno-PIC -Wall -Wsign-compare -Wpointer-arith -Wcast-qual -Wcast-align -I${MANIFEST_VAR_INSTALL_PREFIX}/include -I.\" \\",
       "  LDLIBS=\"-no-pie -lpng -lz -ltsm -ldrm -lm -static -L${MANIFEST_VAR_INSTALL_PREFIX}/lib -I${MANIFEST_VAR_INSTALL_PREFIX}/include -I.\"",
       "mkdir -p /initfs/bin",
-      "cp frecon-lite /initfs/bin/frecon"
+      "cp build/frecon-lite /initfs/bin/frecon"
     ]
   },
   {
@@ -177,11 +177,11 @@
       "make -j$(nproc) CROSS_COMPILE=${MANIFEST_VAR_CROSS_COMPILATION_DASH} ARCH=${MANIFEST_VAR_TARGET_ARCHITECTURE} EXTRA_CFLAGS='-fno-PIE -fno-PIC' EXTRA_LDFLAGS='-no-pie -static'",
       "make install CONFIG_PREFIX=/initfs CROSS_COMPILE=${MANIFEST_VAR_CROSS_COMPILATION_DASH}",
       "ln -sf /sbin/init /initfs/init",
-      "mkdir /initfs/dev",
-      "mknod -m 600 /initfs/dev/console c 5 1",
-      "mknod -m 666 /initfs/dev/null c 1 3",
-      "mknod -m 666 /initfs/dev/zero c 1 5",
-      "chmod +x /initfs/init",
+      "mkdir -p /initfs/dev 2>/dev/null || true",
+      "mknod -m 600 /initfs/dev/console c 5 1 2>/dev/null || true",
+      "mknod -m 666 /initfs/dev/null c 1 3 2>/dev/null || true",
+      "mknod -m 666 /initfs/dev/zero c 1 5 2>/dev/null || true",
+      "chmod +x /initfs/init 2>/dev/null || true",
       "chmod +x /initfs/etc/init.d/rcS 2>/dev/null || true"
     ]
   }
