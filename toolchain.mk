@@ -34,10 +34,10 @@ ifneq ($(TARGET),)
       endif
     endif
   endif
-  # Building for arm64 target
-  ifeq ($(TARGET),arm64)
+  # Building for aarch64 target
+  ifeq ($(TARGET),aarch64)
     ifneq ($(HOST_ARCH),aarch64)
-      # Cross-compiling TO arm64
+      # Cross-compiling TO aarch64
       ifeq ($(BUILDENV),1)
 				TOOLCHAIN := aarch64-linux-musl
         CROSS_COMPILE := /opt/cross/$(TOOLCHAIN)/bin/$(TOOLCHAIN)-
@@ -70,3 +70,5 @@ TOUCH ?= touch
 CHMOD ?= chmod
 CHOWN ?= chown
 XZ ?= xz
+GIT ?= git
+FIND ?= find
