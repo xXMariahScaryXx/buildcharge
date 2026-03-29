@@ -1,0 +1,45 @@
+#!/bin/sh
+echo "fs init" > /dev/kmsg 2>/dev/null
+
+mkdir -p /tmp /run /proc /sys /var/log
+
+mount -t proc proc /proc 2>/dev/null
+mount -t sysfs sysfs /sys 2>/dev/null
+mount -t devtmpfs devtmpfs /dev 2>/dev/null
+
+# must be done after devtmpfs
+mkdir -p /dev/pts /dev/shm
+mount -t devpts devpts /dev/pts -o mode=0620,ptmxmode=0666 2>/dev/null
+mount -t tmpfs tmpfs /dev/shm 2>/dev/null
+
+mount -t tmpfs tmpfs /tmp 2>/dev/null
+mount -t tmpfs tmpfs /run 2>/dev/null
+mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null
+
+echo "fs mnt" > /dev/kmsg 2>/dev/null
+
+# ensure essential devices exist
+mknod -m 600 /dev/console c 5 1 2>/dev/null
+mknod -m 666 /dev/null c 1 3 2>/dev/null
+mknod -m 666 /dev/zero c 1 5 2>/dev/null
+mknod -m 666 /dev/full c 1 7 2>/dev/null
+mknod -m 666 /dev/random c 1 8 2>/dev/null
+mknod -m 666 /dev/urandom c 1 9 2>/dev/null
+mknod -m 666 /dev/ptmx c 5 2 2>/dev/null
+
+# this should never happen...
+if [ ! -c /dev/ptmx ]; then
+  echo "ERROR: /dev/ptmx missing" > /dev/kmsg
+  exit 1
+fi
+
+# enable all displays at max brightness
+echo "lght" > /dev/kmsg 2>/dev/null
+for bl in /sys/class/backlight/*; do
+  [ -d "$bl" ] || continue
+  max=$(cat "$bl/max_brightness" 2>/dev/null || echo 255)
+  echo "$max" > "$bl/brightness" 2>/dev/null
+  echo "Backlight $(basename $bl) set to $max" > /dev/kmsg 2>/dev/null
+done
+
+echo "rcS complete" > /dev/kmsg 2>/dev/null
