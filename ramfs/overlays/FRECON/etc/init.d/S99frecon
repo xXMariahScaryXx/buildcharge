@@ -1,0 +1,72 @@
+#!/bin/sh
+source /etc/config.sh
+LOG="/var/log/frecon.log"
+
+commandDispatcher(){
+  command="$1"
+  case "$command" in
+    "start")
+      startFrecon
+      ;;
+    "stop")
+      stopFrecon
+      ;;
+    "restart")
+      stopFrecon
+      startFrecon
+      ;;
+    *)
+      echo "Usage: $0 {start|stop|restart}"
+      exit 1
+      ;;
+  esac
+}
+
+# dont loop, `--daemon` will make it run in the background
+startFrecon(){
+  [ ! -x "/bin/frecon" ] && echo "frecon binary not found or not executable" && exit 1
+
+  # if frecon is already running, but we didn't start it, kill it.
+  FRECON_PID_COUNT=$(pgrep -f "/bin/frecon" | wc -l)
+  [ ! -e /tmp/started-frecon ] && [ ${FRECON_PID_COUNT} -gt 0 ] && echo "frecon is already running, but we didn't start it. Killing it." && stopFrecon
+
+  /bin/frecon \
+    --daemon \
+    --enable-osc \
+    --enable-vts \
+    --num-vts 2 \
+    --no-login \
+    --enable-vt1 \
+    --pre-create-vts >> "$LOG" 2>&1
+
+  COUNT=0
+  # if vt0 doesn't appear within 60 seconds, something is wrong
+  while [ ! -e /run/frecon/vt0 ] && [ $COUNT -lt 60 ]; do
+    sleep 1
+    COUNT=$((COUNT + 1))
+  done
+
+  if [ -e /run/frecon/vt0 ]; then
+    touch /tmp/started-frecon
+    printf '\033]input:on\a' > /run/frecon/vt0
+    printf '\033[?25h' > /run/frecon/vt0
+  else
+    echo "frecon failed to start within 60 seconds"
+    exit 1
+  fi
+
+  if [ "${CONFIG_PACKAGE_FRECON_SHELL}" == "y" ]; then
+    setsid sh -c 'while true; do sh </run/frecon/vt0 >/run/frecon/vt0 2>&1; done' &
+    setsid sh -c 'while true; do sh </run/frecon/vt1 >/run/frecon/vt1 2>&1; done' &
+  fi
+}
+
+# just kill the process i guess
+stopFrecon(){
+  pkill -f "/bin/frecon"
+  rm -rf /tmp/started-frecon
+}
+
+
+# lol tpm2 command dispatcher reference
+commandDispatcher "$@"
