@@ -58,6 +58,7 @@ init_manifest_vars() {
   MANIFEST_VAR_PACKAGE_NAME="$(jq -r .name <<<"$entry")"
   MANIFEST_VAR_PACKAGE_NAME_LOWER="$(echo "$MANIFEST_VAR_PACKAGE_NAME" | tr 'A-Z' 'a-z')"
   MANIFEST_VAR_PACKAGE_NAME_UPPER="$(echo "$MANIFEST_VAR_PACKAGE_NAME" | tr 'a-z' 'A-Z')"
+  MANIFEST_VAR_PACKAGE_PACKAGE_NAME="$(jq -r .package_name <<<"$entry")"
   MANIFEST_VAR_PACKAGE_AUTHOR="$(jq -r .author <<<"$entry")"
   MANIFEST_VAR_PACKAGE_DESCRIPTION="$(jq -r .description <<<"$entry")"
   MANIFEST_VAR_PACKAGE_REPO_URL="$(jq -r .repo_url <<<"$entry")"
@@ -94,6 +95,7 @@ expand_manifest_vars() {
   export MANIFEST_VAR_PACKAGE_REPO_URL
   export MANIFEST_VAR_PACKAGE_DESCRIPTION
   export MANIFEST_VAR_PACKAGE_DIRECTORY
+  export MANIFEST_VAR_PACKAGE_PACKAGE_NAME
   export MANIFEST_VAR_PACKAGE_NAME_LOWER
   export MANIFEST_VAR_PACKAGE_NAME_UPPER
   export MANIFEST_VAR_PACKAGE_NAME
