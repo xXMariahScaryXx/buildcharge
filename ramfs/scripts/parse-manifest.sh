@@ -121,6 +121,11 @@ main() {
     local expanded_patch_dir expanded_overlay_dir expanded_build_cmd_json expanded_entry
     expanded_patch_dir="$(expand_manifest_vars "$MANIFEST_VAR_PACKAGE_PATCH_DIRECTORY")"
     expanded_overlay_dir="$(expand_manifest_vars "$MANIFEST_VAR_PACKAGE_OVERLAY_DIRECTORY")"
+
+    # lol bugfixes...
+    MANIFEST_VAR_PACKAGE_OVERLAY_DIRECTORY="$expanded_overlay_dir" && export MANIFEST_VAR_PACKAGE_OVERLAY_DIRECTORY
+    MANIFEST_VAR_PACKAGE_PATCH_DIRECTORY="$expanded_patch_dir" && export MANIFEST_VAR_PACKAGE_PATCH_DIRECTORY
+    
     expanded_build_cmd_json="$(
       while IFS= read -r line; do 
         expand_manifest_vars "$line"
