@@ -3,6 +3,3 @@ build/
 .config*
 
 scripts/lib/generated/
-
-# workflows aren't done, don't commit them.
-.github/
