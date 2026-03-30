@@ -11,8 +11,11 @@ on:
 jobs:
   wait-for-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ x86_64, aarch64 ]
     steps:
-      - name: Wait for build.yml to finish on main
+      - name: Wait for build (${{ matrix.arch }}) to finish on main
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: main
