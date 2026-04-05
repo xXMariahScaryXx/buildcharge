@@ -1,4 +1,9 @@
 HOST_ARCH := $(shell uname -m)
+ifeq ($(USE_ALL_CORES),1)
+HOST_CORES := $(shell nproc)
+else ifneq ($(USE_ALL_CORES),1)
+HOST_CORES := $(shell expr `nproc` / 2)
+endif
 TARGET ?=
 CROSS_COMPILE ?=
 BUILDENV ?=
