@@ -22,8 +22,8 @@ Note, `bool` means 0 or 1, not true or false.
 `make fullclean`: cleans everything (will require re-downloading build env, recompiling kernel, etc..)
 
 ## Configuration
-`USE_DEFAULT_CONFIG` (bool), whether or not to regenerate the kconfig from the default.
-`make menuconfig`: generates kconfig with a TUI (`make <arch>` will create it from the defaults if it doesn't exist, so this is optional)
+`USE_DEFAULT_CONFIG` (bool), whether or not to regenerate the .config from the default (default true).
+`make menuconfig`: generates .config with a TUI (`make <arch>` will create it from the defaults if it doesn't exist, so this is optional)
 
 ## Licensing
 The project is licensed under the GPLv2 license with the exception of the following folders:
