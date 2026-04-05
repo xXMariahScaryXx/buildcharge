@@ -31,7 +31,7 @@ $(INITFS_CPIO):
 
 $(INITFS_CPIOZ): $(INITFS_CPIO)
 	$(Q)$(XZ) -kf -9 --check=crc32 $(INITFS_CPIO)
-	
+
 $(KPART): $(BZIMAGE)
 	$(Q)echo "  KPART      $(KPART)"
 	$(Q)echo $(CMDLINE) >> $(TMPFILE)
@@ -47,22 +47,12 @@ ifeq ($(TARGET),aarch64)
 			--fdtdir $(WORK_DIR)/dtbs \
 			--root none \
 			--kernel-cmdline $(CMDLINE) \
-			--vboot-keyblock $(KEYBLOCK) \
-			--vboot-private-key $(DATA_KEY) \
 			--output $(KPART)
-ifeq ($(RECOVERY),1)
-	$(Q)$(FUTILITY) vbutil_kernel --keyblock $(RECO_KEYBLOCK) \
-		--oldblob $(KPART) \
-		--repack $(KPART) \
-		--signprivate $(RECO_DATA_KEY) \
-		--version $(KERNEL_VERSION)
-else
 	$(Q)$(FUTILITY) vbutil_kernel --keyblock $(KEYBLOCK) \
 		--oldblob $(KPART) \
 		--repack $(KPART) \
 		--signprivate $(DATA_KEY) \
 		--version $(KERNEL_VERSION)
-endif
 endif
 	$(Q)$(MKDIR) -p $(OUTDIR)
 	$(Q)$(COPY) $(KPART) $(OUTDIR)

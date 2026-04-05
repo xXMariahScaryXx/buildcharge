@@ -9,7 +9,7 @@ buildroot-like project that allows you to build a mainline linux kernel & initra
 Usage:
 ```bash
 make <architecture> <variables>
-# acceptable architectures are x86_64, arm64, and aarch64
+# acceptable architectures are x86_64 and arm64/aarch64 (identical)
 ```
 Important variables:
 Note, `bool` means 0 or 1, not true or false.
