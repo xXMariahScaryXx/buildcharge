@@ -13,7 +13,7 @@ make <architecture> <variables>
 ```
 
 ## Important variables:
-Note, `bool` means 0 or 1, not true or false. <br>
+Note, `bool` means 0 or 1, not true or false. <br><br>
 `KERNEL_VERSION` (int), the ChromeOS kernver to give the kernel. <br>
 `RECOVERY` (bool), whether or not to sign with recovery keys. <br>
 `USE_ALL_CORES` (bool), whether to use all CPU cores to compile the kernel (uses half if false).
