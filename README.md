@@ -11,19 +11,20 @@ Usage:
 make <architecture> <variables>
 # acceptable architectures are x86_64 and arm64/aarch64 (identical)
 ```
-Important variables:
+
+## Important variables:
 Note, `bool` means 0 or 1, not true or false.
-`KERNEL_VERSION` (int), the ChromeOS kernver to give the kernel.
-`RECOVERY` (bool), whether or not to sign with recovery keys.
-`USE_ALL_CORES` (bool), whether to use all CPU cores to compile the kernel (uses half if false).
+- `KERNEL_VERSION` (int), the ChromeOS kernver to give the kernel.
+- `RECOVERY` (bool), whether or not to sign with recovery keys.
+- `USE_ALL_CORES` (bool), whether to use all CPU cores to compile the kernel (uses half if false).
 
 ## Cleaning
-`make clean-<architecture>`: cleans bzimage, initramfs, and final kernel for <arch>
-`make fullclean`: cleans everything (will require re-downloading build env, recompiling kernel, etc..)
+- `make clean-<architecture>`: cleans bzimage, initramfs, and final kernel for \<arch\>
+- `make fullclean`: cleans everything (will require re-downloading build env, recompiling kernel, etc..) 
 
 ## Configuration
-`USE_DEFAULT_CONFIG` (bool), whether or not to regenerate the .config from the default (default true).
-`make menuconfig`: generates .config with a TUI (`make <arch>` will create it from the defaults if it doesn't exist, so this is optional)
+- `USE_DEFAULT_CONFIG` (bool), whether or not to regenerate the .config from the default (default true).
+- `make menuconfig`: generates .config with a TUI (`make <arch>` will create it from the defaults if it doesn't exist, so this is optional)
 
 ## Licensing
 The project is licensed under the GPLv2 license with the exception of the following folders:
