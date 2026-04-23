@@ -1,10 +1,12 @@
 $(BZIMAGE):
+# This should be fine since to be at this point we'd need to have a valid configuration anyway...
+ifeq ($(CONFIG_KERNEL),y)
 ifneq ($(KERNEL_EXISTS),1)
 	@echo "  GIT       kernel"
 	$(Q)$(GIT) clone $(KERNEL_REPO) --depth 1 -b $(KERNEL_BRANCH) $(KERNEL_DIR)
 else
 	@echo "  GIT       kernel (exists)"
-endif
+endif # if ! KERNEL_EXISTS=1
 	$(Q)apk add elfutils-dev bc ncurses-dev mpfr-dev gmp-dev mpc1-dev
 	$(Q)$(FIND) $(PROJECT_DIR)/patches/kernel/ -type f -print0 | xargs -0 -n 1 patch -fud $(KERNEL_DIR) -p1
 	$(Q)$(MKDIR) -p $(KERNEL_BUILD_DIR)
@@ -14,10 +16,11 @@ endif
 ifeq ($(TARGET),aarch64)
 	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR) dtbs_install INSTALL_DTBS_PATH=$(WORK_DIR)/dtbs/
 	$(Q)$(COPY) $(KERNEL_BUILD_DIR)/arch/$(KERNEL_TARGET)/boot/Image.gz $(BZIMAGE)
-endif
+endif # if TARGET=aarch64
 ifeq ($(TARGET),x86_64)
 	$(Q)$(COPY) $(KERNEL_BUILD_DIR)/arch/$(KERNEL_TARGET)/boot/bzImage $(BZIMAGE)
-endif
+endif # if TARGET=x86_64
+endif # if CONFIG_KERNEL=y
 
 $(INITFS_CPIO):
 	$(Q)$(MKDIR) -p "$(PACKAGE_DIR)"
@@ -33,6 +36,9 @@ $(INITFS_CPIOZ): $(INITFS_CPIO)
 	$(Q)$(XZ) -kf -9 --check=crc32 $(INITFS_CPIO)
 	
 $(KPART): $(BZIMAGE)
+# This should be fine since to be at this point we'd need to have a valid configuration anyway...
+ifeq ($(CONFIG_KERNEL),y)
+ifeq ($(CONFIG_KPART),y) # TODO(kxtz): fully implement CONFIG_KPART
 	$(Q)echo "  KPART      $(KPART)"
 	$(Q)echo $(CMDLINE) >> $(TMPFILE)
 ifeq ($(TARGET),x86_64)
@@ -58,5 +64,7 @@ endif
 endif
 	$(Q)$(MKDIR) -p $(OUTDIR)
 	$(Q)$(COPY) $(KPART) $(OUTDIR)
+endif # if CONFIG_KPART=y
+endif # if CONFIG_KERNEL=y
 
 internal_buildenv: $(INITFS_CPIOZ) $(BZIMAGE) $(KPART)
