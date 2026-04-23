@@ -11,10 +11,10 @@ endif # if ! KERNEL_EXISTS=1
 	$(Q)$(FIND) $(PROJECT_DIR)/patches/kernel/ -type f -print0 | xargs -0 -n 1 patch -fud $(KERNEL_DIR) -p1
 	$(Q)$(MKDIR) -p $(KERNEL_BUILD_DIR)
 	$(Q)$(COPY) $(PROJECT_DIR)/configs/kernel/config.$(TARGET) $(KERNEL_BUILD_DIR)/.config
-	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR) olddefconfig
-	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR)
+	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -j $(HOST_CORES) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR) olddefconfig
+	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -j $(HOST_CORES) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR)
 ifeq ($(TARGET),aarch64)
-	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR) dtbs_install INSTALL_DTBS_PATH=$(WORK_DIR)/dtbs/
+	$(Q)CROSS_COMPILE=$(CROSS_COMPILE) ARCH=$(KERNEL_TARGET) $(MAKE) -j $(HOST_CORES) -C $(KERNEL_DIR) O=$(KERNEL_BUILD_DIR) dtbs_install INSTALL_DTBS_PATH=$(WORK_DIR)/dtbs/
 	$(Q)$(COPY) $(KERNEL_BUILD_DIR)/arch/$(KERNEL_TARGET)/boot/Image.gz $(BZIMAGE)
 endif # if TARGET=aarch64
 ifeq ($(TARGET),x86_64)
@@ -34,7 +34,7 @@ $(INITFS_CPIO):
 
 $(INITFS_CPIOZ): $(INITFS_CPIO)
 	$(Q)$(XZ) -kf -9 --check=crc32 $(INITFS_CPIO)
-	
+
 $(KPART): $(BZIMAGE)
 # This should be fine since to be at this point we'd need to have a valid configuration anyway...
 ifeq ($(CONFIG_KERNEL),y)
@@ -46,9 +46,6 @@ ifeq ($(TARGET),x86_64)
 	$(Q)$(FUTILITY) vbutil_kernel --pack $(KPART) --signprivate $(DATA_KEY) --keyblock $(KEYBLOCK) --config $(TMPFILE) --bootloader $(TMPFILE) --vmlinuz $(BZIMAGE) --version $(KERNEL_VERSION) --arch $(KERNEL_TARGET)
 endif
 ifeq ($(TARGET),aarch64)
-ifeq ($(RECOVERY),1)
-	$(Q)echo "|-!-| Building aarch64 images with recovery keys does not work due to a depthchargectl bug. Please resign using make_dev_ssd.sh and --recovery_key |-!-|"
-endif
 	$(Q)apk add depthcharge-tools
 	$(Q)$(DEPTHCHARGECTL) build \
 			--board arm64-generic \
@@ -56,11 +53,12 @@ endif
 			--fdtdir $(WORK_DIR)/dtbs \
 			--root none \
 			--kernel-cmdline $(CMDLINE) \
-			--vboot-keyblock $(KEYBLOCK) \
-			--vboot-private-key $(DATA_KEY) \
 			--output $(KPART)
-	$(Q)cp $(KPART) /tmp/$(KPART)
-	$(Q)$(FUTILITY) vbutil_kernel --oldblob /tmp/$(KPART) --repack $(KPART) --signprivate $(DATA_KEY) --version $(KERNEL_VERSION)
+	$(Q)$(FUTILITY) vbutil_kernel --keyblock $(KEYBLOCK) \
+		--oldblob $(KPART) \
+		--repack $(KPART) \
+		--signprivate $(DATA_KEY) \
+		--version $(KERNEL_VERSION)
 endif
 	$(Q)$(MKDIR) -p $(OUTDIR)
 	$(Q)$(COPY) $(KPART) $(OUTDIR)
