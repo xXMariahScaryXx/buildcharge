@@ -178,6 +178,12 @@ config KERNEL_RAMFS_BUNDLED
     kernel changes.
 
 endmenu
+
+config KPART
+  bool "Enable compiling into a depthcharge kernel blob"
+  default y
+  help
+    Enables whether or not to produce a depthcharge kernel blob (kpart).
 EOF
   } > "$out"
 
